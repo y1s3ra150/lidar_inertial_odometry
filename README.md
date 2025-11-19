@@ -7,8 +7,26 @@ Tightly-coupled LiDAR-Inertial Odometry using Iterated Extended Kalman Filter wi
 ## Features
 
 - **Iterated Extended Kalman Filter (IEKF)**: Direct LiDAR-IMU fusion with nested iteration for re-linearization and convergence
+- **Adaptive Robust Estimation**: Probabilistic Kernel Optimization (PKO) for automatic Huber loss scale tuning
 - **Incremental Voxel hashing for fast correspondence search**: Hash-based spatial indexing with O(1) lookup
 - **Motion compensation**: IMU-based undistortion for moving LiDAR scans
+
+### Probabilistic Kernel Optimization (PKO)
+
+This project implements adaptive robust estimation using Probabilistic Kernel Optimization for automatic Huber loss scale tuning. If you use this method in your research, please cite:
+
+```bibtex
+@article{choi2025pko,
+  title={Probabilistic Kernel Optimization for Robust State Estimation},
+  author={Choi, Seungwon and Kim, Tae-Wan},
+  journal={IEEE Robotics and Automation Letters},
+  volume={10},
+  number={3},
+  pages={2998--3005},
+  year={2025},
+  publisher={IEEE}
+}
+```
 
 ## Demo
 
@@ -57,9 +75,10 @@ cd build
 lidar_inertial_odometry/
 ├── src/
 │   ├── core/             # Core algorithm implementation
-│   │   ├── Estimator.h/cpp      # IEKF-based LIO estimator
-│   │   ├── State.h/cpp          # 18-dim state representation
-│   │   └── VoxelMap.h/cpp       # Hash-based voxel map for fast KNN
+│   │   ├── Estimator.h/cpp                  # IEKF-based LIO estimator
+│   │   ├── State.h/cpp                      # 18-dim state representation
+│   │   ├── VoxelMap.h/cpp                   # Hash-based voxel map for fast KNN
+│   │   └── ProbabilisticKernelOptimizer.h/cpp # PKO for adaptive robust estimation
 │   │
 │   ├── util/             # Utility functions
 │   │   ├── LieUtils.h/cpp       # SO3/SE3 Lie group operations
@@ -73,7 +92,8 @@ lidar_inertial_odometry/
 │   └── lio_player.cpp    # Dataset player with live visualization
 │
 ├── config/               # Configuration files
-│   └── avia.yaml         # Parameters for Livox Avia LiDAR
+│   ├── avia.yaml         # Parameters for Livox Avia LiDAR
+│   └── mid360.yaml       # Parameters for Livox Mid-360 LiDAR
 │
 ├── thirdparty/           # Third-party libraries
 │   ├── pangolin/         # 3D visualization
@@ -82,7 +102,6 @@ lidar_inertial_odometry/
 ├── CMakeLists.txt        # CMake build configuration
 └── README.md             # This file
 ```
-
 
 
 
