@@ -667,7 +667,7 @@ Estimator::FindCorrespondences(const PointCloudPtr scan) {
     const int K = 5;  // Number of neighbors for plane fitting
     const float max_neighbor_distance = 1.0f;  // Maximum distance for neighbors (meters)
     const float max_plane_distance = 0.1f;  // Maximum distance from point to fitted plane
-    const int max_correspondences = 500;  // Maximum number of correspondences to find
+    const int max_correspondences = m_params.max_correspondences;  // Maximum number of correspondences to find
     
     // PRE-TRANSFORM: Transform entire scan to world frame ONCE (major optimization)
     PointCloudPtr scan_world = std::make_shared<PointCloud>();
@@ -772,7 +772,7 @@ Estimator::FindCorrespondences(const PointCloudPtr scan) {
         }
         
         if (!plane_valid) {
-            continue;  // Plane fit is poor (points too scattered)
+            continue;  // Plane fit is poor (points too scattered)config.estimator.max_correspondences5
         }
         
         // Check planarity using singular values
@@ -796,6 +796,8 @@ Estimator::FindCorrespondences(const PointCloudPtr scan) {
         correspondences.emplace_back(p_lidar, plane_normal, plane_d);
         valid_correspondences++;
     }
+
+    spdlog::info("Num Correspondance: {}", correspondences.size());
     
     return correspondences;
 }

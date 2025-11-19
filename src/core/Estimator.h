@@ -134,6 +134,7 @@ public:
         
         // LiDAR parameters
         double lidar_noise_std = 0.05;        // m
+        int max_correspondences = 1000;
         double max_correspondence_distance = 1.0;  // m
         int max_iterations = 10;
         double convergence_threshold = 1e-3;

@@ -420,6 +420,7 @@ int main(int argc, char** argv) {
     
     // Configure estimator parameters from config
     estimator.m_params.voxel_size = config.estimator.voxel_size;
+    estimator.m_params.max_correspondences = config.estimator.max_correspondences;
     estimator.m_params.max_correspondence_distance = config.estimator.max_correspondence_distance;
     estimator.m_params.max_iterations = config.estimator.max_iterations;
     estimator.m_params.convergence_threshold = config.estimator.convergence_threshold;
