@@ -610,6 +610,10 @@ int main(int argc, char** argv) {
     spdlog::info("  Total frames processed: {}", frame_count);
     spdlog::info("  LiDAR frames: {}", lidar_frame_count);
     spdlog::info("");
+    
+    // Print processing time statistics
+    estimator.PrintProcessingTimeStatistics();
+    
     spdlog::info("Viewer will stay open. Close window to quit.");
     
     // Keep viewer open until user closes it

@@ -1149,7 +1149,7 @@ void Estimator::PrintProcessingTimeStatistics() const {
     
     spdlog::info("");
     spdlog::info("════════════════════════════════════════════════════════");
-    spdlog::info("📊 Processing Time Statistics (Total {} frames)", m_processing_times.size());
+    spdlog::info("Processing Time Statistics (Total {} frames)", m_processing_times.size());
     spdlog::info("════════════════════════════════════════════════════════");
     spdlog::info("   Average: {:.2f} ms", avg_time);
     spdlog::info("   Min:     {:.2f} ms", min_time);
