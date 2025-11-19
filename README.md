@@ -37,24 +37,15 @@ This will:
 
 ## Usage
 
-### Run with R3LIVE Dataset
+### Quick Start
 
 ```bash
 cd build
-./lio_player ../config/avia.yaml /path/to/dataset
-```
 
-**Arguments:**
-- `<config_path>`: Path to YAML configuration file (required)
-- `[dataset_path]`: Path to dataset directory (optional, can be specified in config)
-
-**Example:**
-```bash
 ./lio_player ../config/avia.yaml /home/user/data/R3LIVE/hku_main_building
+or
 ./lio_player ../config/mid360.yaml /path/to/mid360_dataset
 ```
-
-### Example Dataset
 
 **hku_main_building** dataset from R3LIVE:
 - **Download**: [Google Drive Link](https://drive.google.com/file/d/1NPtqg34vdAM-BMdqQ_pfRgVvzVVRuXd6/view?usp=sharing)
