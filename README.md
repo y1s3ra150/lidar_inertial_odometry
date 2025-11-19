@@ -41,9 +41,13 @@ This will:
 
 ```bash
 cd build
-
 ./lio_player ../config/avia.yaml /home/user/data/R3LIVE/hku_main_building
+```
+
 or
+
+```bash
+cd build
 ./lio_player ../config/mid360.yaml /path/to/mid360_dataset
 ```
 
