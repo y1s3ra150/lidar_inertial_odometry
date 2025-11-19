@@ -510,6 +510,9 @@ void Estimator::ProcessLidar(const LidarData& lidar) {
     m_last_lidar_state = m_current_state;
     m_frame_count++;
     
+    // Track processing time statistics
+    m_processing_times.push_back(processing_time);
+    
     // Clean summary log
     spdlog::info("======================= Frame {} =========================", m_frame_count);
     spdlog::info("Processing time: {:.2f} ms", processing_time);
@@ -644,19 +647,14 @@ std::vector<std::tuple<Eigen::Vector3f, Eigen::Vector3f, float>>
 Estimator::FindCorrespondences(const PointCloudPtr scan) {
     std::vector<std::tuple<Eigen::Vector3f, Eigen::Vector3f, float>> correspondences;
     
-    // Check if map is empty
-    if (!m_map_cloud || m_map_cloud->empty()) {
-        spdlog::warn("[Estimator] Map is empty, no correspondences found");
+    // Check if VoxelMap is available and has points
+    if (!m_voxel_map || m_voxel_map->GetPointCount() == 0) {
+        spdlog::warn("[Estimator] VoxelMap is empty, no correspondences found");
         return correspondences;
     }
     
     if (!scan || scan->empty()) {
         spdlog::warn("[Estimator] Scan is empty, no correspondences found");
-        return correspondences;
-    }
-    
-    // Check if VoxelMap is available
-    if (!m_voxel_map) {
         return correspondences;
     }
     
@@ -725,12 +723,12 @@ Estimator::FindCorrespondences(const PointCloudPtr scan) {
             continue;  // Neighbors too far away
         }
         
-        // 4. Collect neighbor points for plane fitting
+        // 4. Collect neighbor points for plane fitting directly from VoxelMap
         std::vector<Eigen::Vector3f> neighbor_points;
         neighbor_points.reserve(K);
         
-        for (int i = 0; i < K; i++) {
-            const auto& neighbor_pt = m_map_cloud->at(neighbor_indices[i]);
+        for (int j = 0; j < K; j++) {
+            const Point3D& neighbor_pt = m_voxel_map->GetPoint(neighbor_indices[j]);
             neighbor_points.emplace_back(neighbor_pt.x, neighbor_pt.y, neighbor_pt.z);
         }
         
@@ -892,6 +890,7 @@ void Estimator::UpdateLocalMap(const PointCloudPtr scan) {
             auto start_voxelmap = std::chrono::high_resolution_clock::now();
             if (!m_map_cloud->empty()) {
                 m_voxel_map = std::make_shared<VoxelMap>(static_cast<float>(m_params.voxel_size));  // Use config voxel size
+                m_voxel_map->SetMaxHitCount(m_params.max_voxel_hit_count);
                 m_voxel_map->AddPointCloud(m_map_cloud);
             }
             auto end_voxelmap = std::chrono::high_resolution_clock::now();
@@ -907,6 +906,8 @@ void Estimator::UpdateLocalMap(const PointCloudPtr scan) {
     // ===== Add new scan to map (only for keyframes) =====
     auto start_transform = std::chrono::high_resolution_clock::now();
     
+    // Transform scan to world frame
+    auto transformed_scan = std::make_shared<PointCloud>();
     int added_count = 0;
     for (const auto& pt : *scan) {
         // LiDAR point in sensor frame
@@ -916,68 +917,43 @@ void Estimator::UpdateLocalMap(const PointCloudPtr scan) {
         Eigen::Vector3f p_imu = m_params.R_il * p_lidar + m_params.t_il;
         Eigen::Vector3f p_world = R_wb * p_imu + t_wb;
         
-        // Add to map cloud
+        // Add to transformed scan
         Point3D map_pt;
         map_pt.x = p_world.x();
         map_pt.y = p_world.y();
         map_pt.z = p_world.z();
         map_pt.intensity = pt.intensity;
         map_pt.offset_time = pt.offset_time;
-        m_map_cloud->push_back(map_pt);
+        transformed_scan->push_back(map_pt);
         added_count++;
     }
     auto end_transform = std::chrono::high_resolution_clock::now();
     double transform_time = std::chrono::duration<double, std::milli>(end_transform - start_transform).count();
 
-    // ===== Apply Frustum Culling to Map =====
-    auto start_frustum = std::chrono::high_resolution_clock::now();
-    // Keep only points within current sensor FOV and range
-    // T_lw = T_li * T_iw = T_li * T_wb^-1
-    Eigen::Matrix3f R_li = m_params.R_il.transpose();  // LiDAR to IMU inverse
-    Eigen::Vector3f t_li = -R_li * m_params.t_il;
-    Eigen::Matrix3f R_iw = R_wb.transpose();  // IMU to world inverse
-    Eigen::Vector3f t_iw = -R_iw * t_wb;
+    // ===== Update VoxelMap: Add new points and remove distant voxels =====
+    auto start_voxelmap_update = std::chrono::high_resolution_clock::now();
     
-    // Compose: R_lw = R_li * R_iw, t_lw = R_li * t_iw + t_li
-    Eigen::Matrix3f R_lw = R_li * R_iw;
-    Eigen::Vector3f t_lw = R_li * t_iw + t_li;
+    // Get current sensor position in world frame
+    Eigen::Vector3d sensor_position = t_wb.cast<double>();
     
-    auto frustum_filtered_map = std::make_shared<PointCloud>();
-    FrustumFilter frustum_filter;
-    frustum_filter.SetSensorPose(R_lw, t_lw);  // World to LiDAR transform
-    frustum_filter.SetFOV(static_cast<float>(m_params.frustum_fov_horizontal), 
-                          static_cast<float>(m_params.frustum_fov_vertical));
-    frustum_filter.SetMaxRange(static_cast<float>(m_params.frustum_max_range));
-    frustum_filter.SetInputCloud(m_map_cloud);
-    frustum_filter.Filter(*frustum_filtered_map);
-    auto end_frustum = std::chrono::high_resolution_clock::now();
-    double frustum_time = std::chrono::duration<double, std::milli>(end_frustum - start_frustum).count();
-
-    // Apply voxel downsampling to control map size
-    auto start_voxel = std::chrono::high_resolution_clock::now();
-    auto downsampled_cloud = std::make_shared<PointCloud>();
-
-    VoxelGrid voxel_filter;
-    voxel_filter.SetInputCloud(frustum_filtered_map);  // Downsample frustum-filtered map
-    voxel_filter.SetLeafSize(static_cast<float>(m_params.voxel_size)); // Use config voxel size
-    voxel_filter.Filter(*downsampled_cloud);
-    auto end_voxel = std::chrono::high_resolution_clock::now();
-    double voxel_time = std::chrono::duration<double, std::milli>(end_voxel - start_voxel).count();
-
-    m_map_cloud = downsampled_cloud;
-
-    // Rebuild VoxelMap after map update (faster than KdTree)
-    auto start_voxelmap = std::chrono::high_resolution_clock::now();
-    if (!m_map_cloud->empty())
-    {
-        m_voxel_map = std::make_shared<VoxelMap>(static_cast<float>(m_params.voxel_size));  // Use config voxel size
-        m_voxel_map->AddPointCloud(m_map_cloud);
+    // Update voxel map: add new points and remove voxels > voxel_culling_distance away from new scan
+    if (!m_voxel_map) {
+        m_voxel_map = std::make_shared<VoxelMap>(static_cast<float>(m_params.voxel_size));
+        m_voxel_map->SetMaxHitCount(m_params.max_voxel_hit_count);
     }
-    auto end_voxelmap = std::chrono::high_resolution_clock::now();
-    double voxelmap_time = std::chrono::duration<double, std::milli>(end_voxelmap - start_voxelmap).count();
+    m_voxel_map->UpdateVoxelMap(transformed_scan, sensor_position, m_params.voxel_culling_distance);
+    
+    auto end_voxelmap_update = std::chrono::high_resolution_clock::now();
+    double voxelmap_update_time = std::chrono::duration<double, std::milli>(end_voxelmap_update - start_voxelmap_update).count();
+    
+    // Note: m_map_cloud is not updated here since VoxelMap holds the actual map
+    // If needed for visualization, it can be reconstructed from VoxelMap
     
     auto end_total = std::chrono::high_resolution_clock::now();
     double total_time = std::chrono::duration<double, std::milli>(end_total - start_total).count();
+    
+    spdlog::info("[Map Update] Added {} points, VoxelMap update: {:.2f}ms, Total: {:.2f}ms, Map size: {} voxels",
+                 added_count, voxelmap_update_time, total_time, m_voxel_map->GetVoxelCount());
 }
 
 void Estimator::CleanLocalMap() {
@@ -1004,7 +980,8 @@ void Estimator::CleanLocalMap() {
         
         // Rebuild VoxelMap after cleaning
         if (!m_map_cloud->empty()) {
-            m_voxel_map = std::make_shared<VoxelMap>(0.4f);
+            m_voxel_map = std::make_shared<VoxelMap>(static_cast<float>(m_params.voxel_size));
+            m_voxel_map->SetMaxHitCount(m_params.max_voxel_hit_count);
             m_voxel_map->AddPointCloud(m_map_cloud);
             spdlog::debug("[Estimator] VoxelMap rebuilt after cleaning");
         }

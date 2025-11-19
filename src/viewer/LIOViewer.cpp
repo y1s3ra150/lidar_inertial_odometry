@@ -275,7 +275,9 @@ void LIOViewer::RenderLoop() {
 
         if (m_show_voxel_cubes.Get() && voxel_map_copy && voxel_map_copy->GetVoxelCount() > 0) {
             DrawVoxelCubes(voxel_map_copy);  // Pass voxel_map_copy as parameter
-        } else if (m_show_map.Get() && map_cloud_copy && !map_cloud_copy->empty()) {
+        }
+        
+        if (m_show_map.Get() && voxel_map_copy && voxel_map_copy->GetVoxelCount() > 0) {
             DrawMapPointCloud();
         }
 
@@ -357,7 +359,7 @@ void LIOViewer::DrawPointCloud() {
 void LIOViewer::DrawMapPointCloud() {
     std::lock_guard<std::mutex> lock(m_data_mutex);
     
-    if (!m_map_cloud || m_map_cloud->empty()) {
+    if (!m_voxel_map || m_voxel_map->GetVoxelCount() == 0) {
         return;
     }
     
@@ -365,14 +367,28 @@ void LIOViewer::DrawMapPointCloud() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    glPointSize(1.0f);  // Smaller than current points
+    glPointSize(1.0f);  // Slightly larger for centroids
     glBegin(GL_POINTS);
 
-    // Draw map points in white with low alpha (0.1)
-    glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
+    // Get max hit count from VoxelMap config
+    const float max_hit_count = static_cast<float>(m_voxel_map->GetMaxHitCount());
     
-    for (const auto& point : *m_map_cloud) {
-        glVertex3f(point.x, point.y, point.z);
+    // Get all occupied voxels
+    std::vector<VoxelKey> occupied_voxels = m_voxel_map->GetOccupiedVoxels();
+    
+    for (const auto& voxel_key : occupied_voxels) {
+        // Get hit count for this voxel
+        int hit_count = m_voxel_map->GetVoxelHitCount(voxel_key);
+        
+        // Calculate alpha: linear mapping from hit_count [1, max] to alpha [0.1, 1.0]
+        float alpha = std::min(1.0f, std::max(0.1f, hit_count / max_hit_count));
+        
+        // Draw voxel centroid in green with hit-count based alpha
+        glColor4f(0.0f, 1.0f, 0.0f, alpha);
+        
+        // Get weighted centroid (actual average of points in voxel)
+        Eigen::Vector3f centroid = m_voxel_map->GetVoxelCentroid(voxel_key);
+        glVertex3f(centroid.x(), centroid.y(), centroid.z());
     }
     
     glEnd();
@@ -422,47 +438,27 @@ void LIOViewer::DrawVoxelCubes(std::shared_ptr<VoxelMap> voxel_map) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    // Draw each voxel as a semi-transparent cube with edges
-    glLineWidth(1.5f);
+    // Draw each voxel as a white cube with hit-count based transparency
+    glLineWidth(1.0f);
     
-    // Height-based color mapping: -3m to 10m (Jet colormap)
-    const float z_min = -3.0f;
-    const float z_max = 10.0f;
+    // Get max hit count from VoxelMap config
+    const float max_hit_count = static_cast<float>(voxel_map->GetMaxHitCount());
     
     for (const auto& voxel_key : occupied_voxels) {
         Eigen::Vector3f center = voxel_map->VoxelKeyToCenter(voxel_key);
         
-        // Height-based Jet colormap
-        // Normalize height to [0, 1]
-        float z_normalized = (center.z() - z_min) / (z_max - z_min);
-        z_normalized = std::max(0.0f, std::min(1.0f, z_normalized));
+        // Get hit count for this voxel
+        int hit_count = voxel_map->GetVoxelHitCount(voxel_key);
         
-        // Jet colormap
-        float r, g, b;
-        if (z_normalized < 0.25f) {
-            r = 0.0f;
-            g = 4.0f * z_normalized;
-            b = 1.0f;
-        } else if (z_normalized < 0.5f) {
-            r = 0.0f;
-            g = 1.0f;
-            b = 1.0f - 4.0f * (z_normalized - 0.25f);
-        } else if (z_normalized < 0.75f) {
-            r = 4.0f * (z_normalized - 0.5f);
-            g = 1.0f;
-            b = 0.0f;
-        } else {
-            r = 1.0f;
-            g = 1.0f - 4.0f * (z_normalized - 0.75f);
-            b = 0.0f;
-        }
+        // Calculate alpha: linear mapping from hit_count [1, max] to alpha [0.1, 1.0]
+        float alpha = std::min(1.0f, std::max(0.1f, hit_count / max_hit_count));
         
-        // Draw filled cube with height-based color
-        glColor4f(r, g, b, 0.3f);  // Transparent
+        // Draw filled cube with white color and hit-count based alpha
+        glColor4f(1.0f, 1.0f, 1.0f, alpha * 0.3f);  // Filled cube with transparency
         DrawCubeFilled(center, voxel_size);
         
-        // Draw edges with slightly darker color
-        glColor4f(r * 0.7f, g * 0.7f, b * 0.7f, 1.0f);
+        // Draw edges with slightly higher alpha
+        glColor4f(1.0f, 1.0f, 1.0f, alpha * 0.6f);  // Edges more visible
         DrawCube(center, voxel_size);
     }
     

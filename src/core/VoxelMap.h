@@ -82,6 +82,17 @@ public:
     void SetVoxelSize(float size);
     
     /**
+     * @brief Set maximum hit count for voxel occupancy
+     * @param max_count Maximum hit count (default: 10)
+     */
+    void SetMaxHitCount(int max_count) { m_max_hit_count = max_count; }
+    
+    /**
+     * @brief Get maximum hit count for voxel occupancy
+     */
+    int GetMaxHitCount() const { return m_max_hit_count; }
+    
+    /**
      * @brief Get current voxel size
      */
     float GetVoxelSize() const { return m_voxel_size; }
@@ -117,6 +128,22 @@ public:
     void Clear();
     
     /**
+     * @brief Update voxel map: add new points and remove distant voxels
+     * @param new_cloud New point cloud to add
+     * @param sensor_position Current sensor position in world frame
+     * @param max_distance Maximum distance to keep voxels (meters)
+     * 
+     * This method:
+     * 1. Adds new points to the map (creates new voxels automatically)
+     * 2. Removes voxels that are more than max_distance away from sensor
+     * 
+     * This enables incremental map maintenance without full rebuild.
+     */
+    void UpdateVoxelMap(const PointCloudPtr& new_cloud,
+                        const Eigen::Vector3d& sensor_position,
+                        double max_distance);
+    
+    /**
      * @brief Get total number of points in the map
      */
     size_t GetPointCount() const { return m_all_points.size(); }
@@ -143,6 +170,20 @@ public:
      * @return Center position of the voxel in world coordinates
      */
     Eigen::Vector3f VoxelKeyToCenter(const VoxelKey& key) const;
+    
+    /**
+     * @brief Get the weighted centroid of a voxel
+     * @param key Voxel key
+     * @return Weighted average centroid of points in the voxel
+     */
+    Eigen::Vector3f GetVoxelCentroid(const VoxelKey& key) const;
+    
+    /**
+     * @brief Get the hit count of a voxel
+     * @param key Voxel key
+     * @return Hit count (occupancy count) of the voxel
+     */
+    int GetVoxelHitCount(const VoxelKey& key) const;
     
     /**
      * @brief Mark a voxel as hit by current scan
@@ -182,9 +223,19 @@ private:
     // ===== Member Variables =====
     
     float m_voxel_size;  ///< Size of each voxel in meters
+    int m_max_hit_count; ///< Maximum hit count for occupancy (default: 10)
     
-    /// Voxel hash map: VoxelKey -> list of point indices
-    std::unordered_map<VoxelKey, std::vector<int>, VoxelKeyHash> m_voxel_map;
+    /// Voxel data structure
+    struct VoxelData {
+        std::vector<int> point_indices;  ///< Point indices in this voxel
+        Eigen::Vector3f centroid;        ///< Weighted average centroid
+        int hit_count;                   ///< Occupancy count (for decay)
+        
+        VoxelData() : centroid(Eigen::Vector3f::Zero()), hit_count(1) {}
+    };
+    
+    /// Voxel hash map: VoxelKey -> VoxelData
+    std::unordered_map<VoxelKey, VoxelData, VoxelKeyHash> m_voxel_map;
     
     /// Storage for all points (indexed by global index)
     std::vector<Point3D> m_all_points;

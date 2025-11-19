@@ -40,6 +40,9 @@ struct LIOConfig {
         double convergence_threshold;   // Convergence threshold for ICP
         
         // Local map parameters
+        double max_distance;            // Maximum distance for map points (meters)
+        double voxel_culling_distance;  // Distance threshold for voxel culling (meters)
+        int max_voxel_hit_count;        // Maximum hit count for voxel occupancy (1-N)
         double frustum_fov_horizontal;  // Frustum FOV horizontal (degrees)
         double frustum_fov_vertical;    // Frustum FOV vertical (degrees)
         double frustum_max_range;       // Maximum range for frustum culling (meters)

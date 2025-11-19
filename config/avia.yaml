@@ -36,9 +36,9 @@ estimator:
   convergence_threshold: 1e-4 # Convergence threshold for optimization
   
   # Local map parameters
-  frustum_fov_horizontal: 90.0  # Frustum FOV horizontal (degrees, ±35°)
-  frustum_fov_vertical: 90.0    # Frustum FOV vertical (degrees, ±35°)
-  frustum_max_range: 50.0       # Maximum range for frustum culling (meters)
+  max_distance: 50.0           # Maximum distance to keep map points (meters)
+  voxel_culling_distance: 1.0  # Distance threshold for voxel culling from new scan (meters)
+  max_voxel_hit_count: 10      # Maximum hit count for voxel occupancy (1-N, default: 10)
   
   # Keyframe parameters
   keyframe_translation_threshold: 1.0   # Translation threshold for keyframe (meters)
@@ -62,7 +62,7 @@ viewer:
 
 # Playback parameters
 playback:
-  playback_speed: 5.0          # Playback speed multiplier
+  playback_speed: 10.0          # Playback speed multiplier
 
 # IMU parameters (Livox Avia built-in IMU)
 imu:
