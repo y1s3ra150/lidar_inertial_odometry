@@ -50,7 +50,7 @@ This will:
 
 **Download Pre-processed Dataset**:
 - **Google Drive**: [M3DGR Parsed Dataset](https://drive.google.com/drive/folders/1zOmvw3sCwRQ0LHo1b-jhY21L693GmOfW?usp=sharing)
-- **Source**: [M3DGR Dataset](https://github.com/SJTU-ViSYS/M3DGR)
+- **Source**: [M3DGR Dataset](https://github.com/sjtuyinjie/M3DGR)
 - **Sensors**: Livox Avia / Mid-360 LiDAR + Built-in IMU
 
 **Running Single Sequence**:
