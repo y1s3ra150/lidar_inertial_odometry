@@ -29,7 +29,7 @@ This project implements adaptive robust estimation using Probabilistic Kernel Op
 
 ## Demo
 
-[![LIO Demo](https://img.youtube.com/vi/2JymC0LWDWI/0.jpg)](https://www.youtube.com/watch?v=2JymC0LWDWI)
+[![LIO Demo](https://img.youtube.com/vi/jSldu7RABqw/0.jpg)](https://www.youtube.com/watch?v=jSldu7RABqw)
 
 
 
