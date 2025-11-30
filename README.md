@@ -28,7 +28,7 @@ This project implements adaptive robust estimation using Probabilistic Kernel Op
 ```
 
 ## Demo
-[![LIO Demo](https://img.youtube.com/vi/20gG_0QFLHs/0.jpg)](https://www.youtube.com/watch?v=20gG_0QFLHs)
+[![LIO Demo](https://img.youtube.com/vi/difotKwX6yo/0.jpg)](https://www.youtube.com/watch?v=difotKwX6yo)
 
 ### ROS2 Wrapper: https://github.com/93won/lio_ros_wrapper
 
@@ -45,7 +45,20 @@ This will:
 
 ### Quick Start
 
-#### M3DGR Dataset (Recommended)
+#### NTU VIRAL Dataset
+
+**Download Pre-processed Dataset**:
+- **Google Drive**: [NTU VIRAL Parsed Dataset](https://drive.google.com/drive/folders/1FMQRJge70qzWWRuTpiXJJMa5MDoF7u4z?usp=sharing)
+- **Source**: [NTU VIRAL Dataset](https://ntu-aris.github.io/ntu_viral_dataset/)
+- **Sensors**: Ouster OS1-16 LiDAR + VectorNav VN100 IMU
+
+**Running Single Sequence**:
+```bash
+cd build
+./lio_player ../config/ntu_viral.yaml /path/to/NTU_VIRAL/eee_01
+```
+
+#### M3DGR Dataset
 
 **Download Pre-processed Dataset**:
 - **Google Drive**: [M3DGR Parsed Dataset](https://drive.google.com/drive/folders/1zOmvw3sCwRQ0LHo1b-jhY21L693GmOfW?usp=sharing)
