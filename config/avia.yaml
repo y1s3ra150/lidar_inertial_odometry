@@ -38,7 +38,7 @@ estimator:
   min_distance: 1.0             # Minimum distance for lidar filtering (meters)
   max_distance: 100.0           # Maximum distance for lidar filtering (meters)
   max_voxel_hit_count: 1000     # Maximum hit count for voxel occupancy (1-N, default: 10)
-  init_hit_count: 100            # Initial hit count when adding new points to voxel
+  init_hit_count: 1000            # Initial hit count when adding new points to voxel
   voxel_hierarchy_factor: 3      # L1 voxel factor: L1 = factor × L0 (e.g., 3 = 3×3×3, 5 = 5×5×5, 7 = 7×7×7)
 
   # Keyframe parameters (distance/rotation based)

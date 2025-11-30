@@ -31,7 +31,7 @@ estimator:
   init_imu_samples: 300       # Number of IMU samples for initialization
   voxel_size: 0.5       # Voxel size in meters for VoxelMap
   max_iterations: 4         # Maximum Gauss-Newton iterations
-  convergence_threshold: 0.001 # Convergence threshold for optimization
+  convergence_threshold: 0.005 # Convergence threshold for optimization
 
   map_planarity_threshold: 0.1  # Planarity threshold for VoxelMap surfel creation
 
@@ -39,7 +39,7 @@ estimator:
   min_distance: 1.0             # Minimum distance for lidar filtering (meters)
   max_distance: 100.0           # Maximum distance for lidar filtering (meters)
   max_voxel_hit_count: 1000     # Maximum hit count for voxel occupancy (1-N, default: 10)
-  init_hit_count: 100            # Initial hit count when adding new points to voxel
+  init_hit_count: 1000            # Initial hit count when adding new points to voxel
   voxel_hierarchy_factor: 3      # L1 voxel factor: L1 = factor × L0 (e.g., 3 = 3×3×3, 5 = 5×5×5, 7 = 7×7×7)
 
   # Keyframe parameters (distance/rotation based)
@@ -57,7 +57,7 @@ viewer:
 
 # Playback parameters
 playback:
-  playback_speed: 10.0          # Playback speed multiplier
+  playback_speed: 1000.0          # Playback speed multiplier
 
 
 imu:

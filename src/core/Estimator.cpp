@@ -432,11 +432,7 @@ void Estimator::ProcessLidar(const LidarData& lidar) {
     std::lock_guard<std::mutex> lock_state(m_state_mutex);
     std::lock_guard<std::mutex> lock_map(m_map_mutex);
     
-    // Clear state history at the start of new LiDAR frame
-    // From now on, only states between current and next LiDAR will be saved
-    m_state_history.clear();
-    
-    // === 1. Undistortion ===
+    // === 1. Undistortion (BEFORE clearing state history!) ===
     auto start_undistort = std::chrono::high_resolution_clock::now();
     PointCloudPtr undistorted_cloud = lidar.cloud;
     if (m_params.enable_undistortion) {
@@ -450,6 +446,10 @@ void Estimator::ProcessLidar(const LidarData& lidar) {
     }
     auto end_undistort = std::chrono::high_resolution_clock::now();
     double time_undistort = std::chrono::duration<double, std::milli>(end_undistort - start_undistort).count();
+    
+    // Clear state history AFTER undistortion
+    // From now on, only states between current and next LiDAR will be saved
+    m_state_history.clear();
     
     // === 2. Downsampling ===
     auto start_downsample = std::chrono::high_resolution_clock::now();

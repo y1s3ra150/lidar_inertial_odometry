@@ -248,7 +248,7 @@ void VoxelMap::UpdateVoxelMap(const PointCloudPtr& new_cloud,
             }
         } else {
             // Voxel is not hit -> decrement hit count by 1
-            voxel_data.hit_count-=2;
+            voxel_data.hit_count-=1;
             
             // Mark for removal if hit count drops below 1
             if (voxel_data.hit_count < 1) {
