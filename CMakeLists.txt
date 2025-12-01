@@ -14,7 +14,15 @@ find_package(OpenMP REQUIRED)
 
 # Use Pangolin from thirdparty
 set(Pangolin_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/pangolin)
-include_directories(${Pangolin_DIR}/include)
+include_directories(${Pangolin_DIR}/components/pango_core/include)
+include_directories(${Pangolin_DIR}/components/pango_display/include)
+include_directories(${Pangolin_DIR}/components/pango_opengl/include)
+include_directories(${Pangolin_DIR}/components/pango_image/include)
+include_directories(${Pangolin_DIR}/components/pango_windowing/include)
+include_directories(${Pangolin_DIR}/components/pango_vars/include)
+include_directories(${Pangolin_DIR}/components/pango_plot/include)
+include_directories(${Pangolin_DIR}/components/pango_geometry/include)
+include_directories(${Pangolin_DIR}/components/pango_glgeometry/include)
 include_directories(${Pangolin_DIR}/build/include)
 link_directories(${Pangolin_DIR}/build)
 

@@ -29,7 +29,8 @@ else
         libeigen3-dev \
         libgl1-mesa-dev \
         libglu1-mesa-dev \
-        libglew-dev
+        libglew-dev \
+        libyaml-cpp-dev
 
     echo "System dependencies installed successfully!"
 fi
