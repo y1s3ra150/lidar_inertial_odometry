@@ -456,8 +456,8 @@ int main(int argc, char** argv) {
     estimator.m_params.point_to_surfel_threshold = config.estimator.point_to_surfel_threshold;
     estimator.m_params.min_surfel_inliers = config.estimator.min_surfel_inliers;
     estimator.m_params.min_linearity_ratio = config.estimator.min_linearity_ratio;
-    estimator.m_params.temporal_bins = config.estimator.temporal_bins;
-    estimator.m_params.temporal_then_voxel = config.estimator.temporal_then_voxel;
+    estimator.m_params.stride = config.estimator.stride;
+    estimator.m_params.stride_then_voxel = config.estimator.stride_then_voxel;
     estimator.m_params.scan_duration = config.estimator.scan_duration;
     
     // Configure IMU noise parameters from config (convert covariance to std deviation)

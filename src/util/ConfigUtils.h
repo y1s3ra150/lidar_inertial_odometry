@@ -59,9 +59,9 @@ struct LIOConfig {
         double keyframe_translation_threshold;  // meters - triggers keyframe when moved > threshold
         double keyframe_rotation_threshold;     // degrees - triggers keyframe when rotated > threshold
         
-        // Temporal bin downsampling
-        int temporal_bins;                      // Number of bins for temporal downsampling (0 = use voxel)
-        bool temporal_then_voxel;               // Apply voxel downsample after temporal bin (default: false)
+        // Stride-based downsampling
+        int stride;                             // Keep every Nth point (1 = no skip)
+        bool stride_then_voxel;                 // Apply voxel downsample after stride (default: true)
     } estimator;
     
     // Viewer parameters

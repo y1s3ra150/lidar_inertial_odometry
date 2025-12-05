@@ -598,26 +598,17 @@ private:
 };
 
 /**
- * @brief Temporal bin-based downsampling for LiDAR scans
+ * @brief Stride-based point cloud downsampling
  * 
- * Instead of spatial voxel-based downsampling, this function uses offset_time
- * to create temporal bins. For a scan duration of 0~0.1s with N bins,
- * each bin covers (scan_duration / N) seconds. Only the first point in each bin is kept.
+ * Keeps every Nth point from the input cloud. Simple and efficient.
  * 
- * Benefits:
- * - Uniform temporal distribution (good for motion compensation)
- * - Predictable output size (max N points)
- * - No voxel grid overhead
- * 
- * @param input Input point cloud with offset_time field set
- * @param num_bins Number of temporal bins (e.g., 1000 for ~1000 output points)
- * @param scan_duration Total scan duration in seconds (default 0.1s)
+ * @param input Input point cloud
+ * @param stride Keep every Nth point (1 = no skip, 2 = half, 4 = quarter)
  * @return Downsampled point cloud
  */
-PointCloud::Ptr TemporalBinDownsample(
+PointCloud::Ptr StrideDownsample(
     const PointCloud::ConstPtr& input,
-    int num_bins,
-    float scan_duration = 0.1f);
+    int stride);
 
 } // namespace lio
 

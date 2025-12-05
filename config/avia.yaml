@@ -34,11 +34,9 @@ estimator:
   # Surfel filtering
   map_planarity_threshold: 0.03    # Planarity threshold (sigma_min/sigma_max, smaller = stricter)
 
-  # Temporal bin downsampling (alternative to voxel-based downsampling)
-  temporal_bins: 5000           # Number of bins for temporal downsampling (0 = use voxel-based)
-                                # offset_time [0~scan_duration] is divided into N bins
-                                # Only one point per bin is kept (first-come basis)
-  temporal_then_voxel: true    # Apply voxel downsample after temporal bin (combined filtering)
+  # Stride-based downsampling (simple and efficient)
+  stride: 4                     # Keep every Nth point (1 = no skip, 2 = half, 4 = quarter)
+  stride_then_voxel: true       # Apply voxel downsample after stride (recommended)
 
   # Local map parameters
   min_distance: 3.0             # Minimum distance for lidar filtering (meters)

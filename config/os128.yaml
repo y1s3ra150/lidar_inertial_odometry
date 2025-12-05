@@ -1,6 +1,6 @@
-# LIO Configuration for Livox Mid-360 LiDAR
+# LIO Configuration for Ouster OS1-128 LiDAR
 # Author: Seungwon Choi
-# Date: 2025-11-19
+# Date: 2025-12-05
 
 # Dataset paths (will be overridden by command line argument)
 dataset:
@@ -17,7 +17,7 @@ extrinsics:
     [0.0, 0.0, 1.0]
   ]
 
-  t_il: [0.050, 0.000, -0.055]
+  t_il: [0.014, -0.012, -0.015]
 # Estimator parameters (indoor: 0.5 / 5 / 1.0, outdoor: 1.0 / 3 / 2.0)
 estimator:
   enable_undistortion: true
@@ -25,14 +25,14 @@ estimator:
   init_imu_samples: 500       # Number of IMU samples for initialization
   voxel_size: 0.5       # Voxel size in meters for VoxelMap
   max_iterations: 4       # Maximum Gauss-Newton iterations
-  convergence_threshold: 0.005 # Convergence threshold for optimization
+  convergence_threshold: 0.001 # Convergence threshold for optimization
 
   # Surfel filtering
   map_planarity_threshold: 0.1    # Planarity threshold (sigma_min/sigma_max, smaller = stricter)
 
   # Stride-based downsampling (simple and efficient)
-  stride: 2                     # Keep every Nth point (1 = no skip, 2 = half, 4 = quarter)
-  stride_then_voxel: true       # Apply voxel downsample after stride (recommended)
+  stride: 64                     # Keep every Nth point (1 = no skip, 2 = half, 4 = quarter)
+  stride_then_voxel: false       # Apply voxel downsample after stride (recommended)
 
   # Local map parameters
   min_distance: 3.0             # Minimum distance for lidar filtering (meters)

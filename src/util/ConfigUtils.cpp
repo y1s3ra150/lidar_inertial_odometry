@@ -47,8 +47,8 @@ void SetDefaultConfig(LIOConfig& config) {
     config.estimator.frustum_max_range = 50.0;
     config.estimator.keyframe_translation_threshold = 0.5;  // Default: 0.5 meters
     config.estimator.keyframe_rotation_threshold = 10.0;    // Default: 10 degrees
-    config.estimator.temporal_bins = 1000;                  // Default: 1000 temporal bins
-    config.estimator.temporal_then_voxel = false;           // Default: temporal only
+    config.estimator.stride = 1;                            // Default: keep all points
+    config.estimator.stride_then_voxel = true;              // Default: apply voxel after stride
     config.estimator.scan_duration = 0.1;                   // Default: 0.1 seconds
     
     // Viewer parameters
@@ -150,10 +150,10 @@ bool LoadConfig(const std::string& config_path, LIOConfig& config) {
                 config.estimator.keyframe_translation_threshold = estimator["keyframe_translation_threshold"].as<double>();
             if (estimator["keyframe_rotation_threshold"]) 
                 config.estimator.keyframe_rotation_threshold = estimator["keyframe_rotation_threshold"].as<double>();
-            if (estimator["temporal_bins"]) 
-                config.estimator.temporal_bins = estimator["temporal_bins"].as<int>();
-            if (estimator["temporal_then_voxel"]) 
-                config.estimator.temporal_then_voxel = estimator["temporal_then_voxel"].as<bool>();
+            if (estimator["stride"]) 
+                config.estimator.stride = estimator["stride"].as<int>();
+            if (estimator["stride_then_voxel"]) 
+                config.estimator.stride_then_voxel = estimator["stride_then_voxel"].as<bool>();
             if (estimator["scan_duration"]) 
                 config.estimator.scan_duration = estimator["scan_duration"].as<double>();
             if (estimator["scan_planarity_threshold"]) 

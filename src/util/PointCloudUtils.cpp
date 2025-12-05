@@ -214,42 +214,22 @@ void FrustumFilter::Filter(PointCloud& output) {
     
 }
 
-PointCloud::Ptr TemporalBinDownsample(
+PointCloud::Ptr StrideDownsample(
     const PointCloud::ConstPtr& input,
-    int num_bins,
-    float scan_duration) {
+    int stride) {
     
     auto output = std::make_shared<PointCloud>();
     
-    if (!input || input->empty() || num_bins <= 0) {
+    if (!input || input->empty() || stride <= 0) {
         return output;
     }
     
-    // Create bin occupancy array (false = empty, true = occupied)
-    std::vector<bool> bin_occupied(num_bins, false);
-    
     // Reserve estimated output size
-    output->reserve(std::min(static_cast<size_t>(num_bins), input->size()));
+    output->reserve(input->size() / stride + 1);
     
-    // Bin width in seconds
-    float bin_width = scan_duration / static_cast<float>(num_bins);
-    
-    // Process each point
-    for (size_t i = 0; i < input->size(); ++i) {
-        const auto& point = input->at(i);
-        
-        // Calculate bin index from offset_time
-        // offset_time should be in range [0, scan_duration]
-        int bin_idx = static_cast<int>(point.offset_time / bin_width);
-        
-        // Clamp to valid range
-        bin_idx = std::max(0, std::min(bin_idx, num_bins - 1));
-        
-        // If bin is empty, add point and mark as occupied
-        if (!bin_occupied[bin_idx]) {
-            bin_occupied[bin_idx] = true;
-            output->push_back(point);
-        }
+    // Keep every Nth point
+    for (size_t i = 0; i < input->size(); i += stride) {
+        output->push_back(input->at(i));
     }
     
     return output;

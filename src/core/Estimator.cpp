@@ -435,17 +435,16 @@ void Estimator::ProcessLidar(const LidarData& lidar) {
     // === 1. Preprocessing: Downsampling + Undistortion + Range filtering ===
     auto preprocess_start = std::chrono::high_resolution_clock::now();
     
-    // Temporal bin-based downsampling (if temporal_bins > 0)
+    // Stride-based downsampling (if stride > 1)
     PointCloudPtr downsampled_scan;
-    if (m_params.temporal_bins > 0) {
-        downsampled_scan = TemporalBinDownsample(
+    if (m_params.stride > 1) {
+        downsampled_scan = StrideDownsample(
             lidar.cloud,
-            m_params.temporal_bins,
-            static_cast<float>(m_params.scan_duration)
+            m_params.stride
         );
         
-        // Optionally apply voxel downsample after temporal bin
-        if (m_params.temporal_then_voxel) {
+        // Optionally apply voxel downsample after stride
+        if (m_params.stride_then_voxel) {
             PointCloudPtr voxel_filtered = std::make_shared<PointCloud>();
             VoxelGrid scan_filter;
             scan_filter.SetInputCloud(downsampled_scan);

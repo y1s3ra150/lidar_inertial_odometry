@@ -194,9 +194,9 @@ public:
         int imu_buffer_size = 1000;
         bool enable_undistortion = true;
         
-        // Temporal bin downsampling
-        int temporal_bins = 1000;              // Number of bins for temporal downsampling (0 = use voxel)
-        bool temporal_then_voxel = false;      // Apply voxel downsample after temporal bin
+        // Stride-based downsampling
+        int stride = 1;                        // Keep every Nth point (1 = no skip)
+        bool stride_then_voxel = true;         // Apply voxel downsample after stride
         double scan_duration = 0.1;            // LiDAR scan duration in seconds
     } m_params;
 
