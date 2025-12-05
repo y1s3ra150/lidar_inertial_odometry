@@ -100,10 +100,30 @@ public:
     /// Get trajectory history
     std::vector<State> GetTrajectory() const;
     
-    /// Get local map point cloud
+    /// Get local map point cloud (L0 voxel centroids)
     PointCloudPtr GetMapPointCloud() const {
         std::lock_guard<std::mutex> lock(m_map_mutex);
-        return m_map_cloud;
+        
+        if (!m_voxel_map) {
+            return std::make_shared<PointCloud>();
+        }
+        
+        // Get L0 centroids
+        auto centroids = m_voxel_map->GetL0Centroids();
+        
+        auto map_cloud = std::make_shared<PointCloud>();
+        map_cloud->reserve(centroids.size());
+        
+        for (const auto& centroid : centroids) {
+            Point3D pt;
+            pt.x = centroid.x();
+            pt.y = centroid.y();
+            pt.z = centroid.z();
+            pt.intensity = 1.0f;
+            map_cloud->push_back(pt);
+        }
+        
+        return map_cloud;
     }
     
     /// Check if system is initialized

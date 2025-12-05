@@ -257,6 +257,19 @@ public:
     size_t GetVoxelCount() const { return m_voxels_L0.size(); }
     
     /**
+     * @brief Get all L0 voxel centroids
+     * @return Vector of L0 centroids
+     */
+    std::vector<Eigen::Vector3f> GetL0Centroids() const {
+        std::vector<Eigen::Vector3f> centroids;
+        centroids.reserve(m_voxels_L0.size());
+        for (const auto& pair : m_voxels_L0) {
+            centroids.push_back(pair.second.centroid);
+        }
+        return centroids;
+    }
+    
+    /**
      * @brief Get centroid of a voxel as a Point3D
      * @param key Voxel key
      * @return Centroid as Point3D (with zero intensity and offset_time)
